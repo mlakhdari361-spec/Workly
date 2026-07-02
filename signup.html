@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WorldHub — إنشاء حساب</title>
+<link rel="stylesheet" href="main.css">
+<style>
+  .auth-wrap{ min-height:100vh; display:grid; grid-template-columns: 1fr 480px; }
+  .auth-hero{
+    position:relative; overflow:hidden; display:flex; flex-direction:column; justify-content:center; padding:52px; gap:18px;
+    background:
+      radial-gradient(700px 500px at 80% 10%, rgba(139,92,246,.35), transparent 60%),
+      radial-gradient(600px 500px at 10% 90%, rgba(20,184,166,.22), transparent 55%),
+      linear-gradient(200deg,#0d0d16,#100a1c 60%,#0a0a10);
+  }
+  .step-item{ display:flex; gap:14px; align-items:flex-start; max-width:480px; }
+  .step-num{ width:34px; height:34px; border-radius:50%; background:var(--accent-soft); color:var(--accent-2); display:flex; align-items:center; justify-content:center; font-weight:900; font-family:var(--font-display); flex-shrink:0; }
+  .step-item h3{ font-family:var(--font-display); font-size:16px; font-weight:800; margin-bottom:3px; }
+  .step-item p{ color:var(--text-dim); font-size:13.5px; }
+  .auth-form{ display:flex; flex-direction:column; justify-content:center; padding:52px 44px; }
+  .auth-form .brand{ margin-bottom:26px; }
+  .auth-form h2{ font-family:var(--font-display); font-size:24px; font-weight:800; margin-bottom:6px; }
+  .auth-form .sub{ color:var(--text-dim); font-size:13.5px; margin-bottom:24px; }
+  .name-row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .foot-link{ text-align:center; margin-top:18px; font-size:13.5px; color:var(--text-dim); }
+  .foot-link a{ color:var(--accent-2); font-weight:800; }
+  .terms{ font-size:12px; color:var(--text-faint); }
+  .terms a{ color:var(--accent-2); }
+  @media (max-width:900px){ .auth-wrap{ grid-template-columns:1fr; } .auth-hero{ display:none; } }
+</style>
+</head>
+<body>
+<div class="auth-wrap">
+  <section class="auth-hero">
+    <a href="index.html" class="brand" style="margin-bottom:20px;">
+      <div class="brand__mark">🌍</div>
+      <div class="brand__name">World<span>Hub</span></div>
+    </a>
+    <div class="step-item">
+      <div class="step-num">1</div>
+      <div><h3>اختر عالمك</h3><p>برمجة، تصميم، طب، أعمال... ابدأ من حيث يهمّك فعلاً.</p></div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">2</div>
+      <div><h3>ابنِ ملفك المهني</h3><p>صورة، نبذة، مهارات — واجهة أنيقة تعكس هويتك.</p></div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">3</div>
+      <div><h3>تفاعل وانمُ</h3><p>انشر، تابع، ناقش، وتقدّم لوظائف داخل مجتمعك.</p></div>
+    </div>
+  </section>
+
+  <section class="auth-form">
+    <a href="index.html" class="brand">
+      <div class="brand__mark">🌍</div>
+      <div class="brand__name">World<span>Hub</span></div>
+    </a>
+    <h2>إنشاء حساب جديد</h2>
+    <div class="sub">انضم مجاناً وابدأ استكشاف عوالمك المفضّلة.</div>
+
+    <form id="signupForm">
+      <div class="name-row">
+        <div class="field"><label>الاسم الأول</label><input type="text" placeholder="مثال: سارة" required></div>
+        <div class="field"><label>اسم العائلة</label><input type="text" placeholder="مثال: أحمد" required></div>
+      </div>
+      <div class="field"><label>البريد الإلكتروني</label><input type="email" placeholder="name@example.com" required></div>
+      <div class="field"><label>كلمة المرور</label><input type="password" placeholder="8 أحرف على الأقل" required></div>
+      <div class="field">
+        <label>أقرب عالم لاهتمامك</label>
+        <select required>
+          <option value="">اختر عالماً...</option>
+          <option>💻 البرمجة</option>
+          <option>🤖 الذكاء الاصطناعي</option>
+          <option>🎨 التصميم</option>
+          <option>💼 ريادة الأعمال</option>
+          <option>🩺 الطب</option>
+          <option>📈 المالية</option>
+        </select>
+      </div>
+      <div class="terms mb-16">بإنشائك حساباً فأنت توافق على <a href="#">شروط الاستخدام</a> و<a href="#">سياسة الخصوصية</a>.</div>
+      <button type="submit" class="btn btn-primary btn-block">إنشاء الحساب</button>
+    </form>
+
+    <div class="foot-link">لديك حساب بالفعل؟ <a href="login.html">تسجيل الدخول</a></div>
+  </section>
+</div>
+
+<script src="app.js"></script>
+<script>
+  document.getElementById('signupForm').addEventListener('submit', (e)=>{
+    e.preventDefault();
+    WH.toast('تم إنشاء الحساب بنجاح ✓');
+    setTimeout(()=> window.location.href = 'index.html', 700);
+  });
+</script>
+</body>
+</html>

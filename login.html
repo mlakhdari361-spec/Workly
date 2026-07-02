@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WorldHub — تسجيل الدخول</title>
+<link rel="stylesheet" href="main.css">
+<style>
+  .auth-wrap{ min-height:100vh; display:grid; grid-template-columns: 1fr 460px; }
+  .auth-hero{
+    position:relative; overflow:hidden; display:flex; flex-direction:column; justify-content:flex-end; padding:52px;
+    background:
+      radial-gradient(700px 500px at 20% 10%, rgba(139,92,246,.35), transparent 60%),
+      radial-gradient(600px 500px at 90% 90%, rgba(20,184,166,.25), transparent 55%),
+      linear-gradient(160deg,#0d0d16,#100a1c 60%,#0a0a10);
+  }
+  .auth-hero__worlds{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom:34px; max-width:520px; }
+  .auth-chip{ display:flex; align-items:center; gap:8px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); padding:8px 14px; border-radius:99px; font-size:13px; font-weight:700; backdrop-filter:blur(6px); }
+  .auth-hero h1{ font-family:var(--font-display); font-size:38px; font-weight:900; max-width:520px; line-height:1.35; }
+  .auth-hero p{ color:var(--text-dim); margin-top:14px; max-width:460px; font-size:15px; }
+  .auth-form{ display:flex; flex-direction:column; justify-content:center; padding:52px 44px; }
+  .auth-form .brand{ margin-bottom:30px; }
+  .auth-form h2{ font-family:var(--font-display); font-size:24px; font-weight:800; margin-bottom:6px; }
+  .auth-form .sub{ color:var(--text-dim); font-size:13.5px; margin-bottom:26px; }
+  .or-sep{ display:flex; align-items:center; gap:12px; color:var(--text-faint); font-size:12px; margin:18px 0; }
+  .or-sep::before, .or-sep::after{ content:''; flex:1; height:1px; background:var(--border); }
+  .social-row{ display:flex; gap:10px; }
+  .social-row .btn{ flex:1; }
+  .foot-link{ text-align:center; margin-top:22px; font-size:13.5px; color:var(--text-dim); }
+  .foot-link a{ color:var(--accent-2); font-weight:800; }
+  @media (max-width:900px){ .auth-wrap{ grid-template-columns:1fr; } .auth-hero{ display:none; } }
+</style>
+</head>
+<body>
+<div class="auth-wrap">
+  <section class="auth-hero">
+    <div class="auth-hero__worlds">
+      <span class="auth-chip">💻 البرمجة</span>
+      <span class="auth-chip">🤖 الذكاء الاصطناعي</span>
+      <span class="auth-chip">🎨 التصميم</span>
+      <span class="auth-chip">💼 ريادة الأعمال</span>
+      <span class="auth-chip">📈 المالية</span>
+      <span class="auth-chip">🎓 التعليم</span>
+    </div>
+    <h1>منصة واحدة، وعوالم لا حصر لها.</h1>
+    <p>WorldHub يجمع الشبكات المهنية، والمجتمعات المتخصصة، والنقاش، والتوظيف — في مكان واحد. انضم إلى العالم الذي يناسب اهتمامك.</p>
+  </section>
+
+  <section class="auth-form">
+    <a href="index.html" class="brand">
+      <div class="brand__mark">🌍</div>
+      <div class="brand__name">World<span>Hub</span></div>
+    </a>
+    <h2>تسجيل الدخول</h2>
+    <div class="sub">سعداء بعودتك. أدخل بياناتك للمتابعة إلى عوالمك.</div>
+
+    <form id="loginForm">
+      <div class="field">
+        <label>البريد الإلكتروني</label>
+        <input type="email" placeholder="name@example.com" required>
+      </div>
+      <div class="field">
+        <label>كلمة المرور</label>
+        <input type="password" placeholder="••••••••" required>
+      </div>
+      <div class="flex justify-between items-center mb-16" style="font-size:13px;">
+        <label class="flex items-center gap-8"><input type="checkbox" style="width:auto;"> تذكرني</label>
+        <a href="#" class="text-accent fw-700">نسيت كلمة المرور؟</a>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">تسجيل الدخول</button>
+    </form>
+
+    <div class="or-sep">أو المتابعة عبر</div>
+    <div class="social-row">
+      <button class="btn btn-secondary">Google</button>
+      <button class="btn btn-secondary">Apple</button>
+      <button class="btn btn-secondary">GitHub</button>
+    </div>
+
+    <div class="foot-link">ليس لديك حساب؟ <a href="signup.html">إنشاء حساب جديد</a></div>
+  </section>
+</div>
+
+<script src="app.js"></script>
+<script>
+  document.getElementById('loginForm').addEventListener('submit', (e)=>{
+    e.preventDefault();
+    window.location.href = 'index.html';
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WorldHub — الرسائل</title>
+<link rel="stylesheet" href="main.css">
+<link rel="stylesheet" href="sidebar.css">
+<style>
+  .msg-shell{ display:grid; grid-template-columns: 320px 1fr; height:calc(100vh - 68px - 48px); border-radius:var(--radius-lg); overflow:hidden; }
+  .conv-list{ border-inline-start:1px solid var(--border-soft); overflow:auto; }
+  .conv-search{ padding:14px; border-bottom:1px solid var(--border-soft); }
+  .conv-search input{ width:100%; background:var(--bg-input); border:1px solid var(--border); border-radius:99px; padding:9px 14px; font-size:13px; }
+  .conv-item{ display:flex; gap:11px; padding:12px 16px; cursor:pointer; border-bottom:1px solid var(--border-soft); position:relative; }
+  .conv-item:hover{ background:var(--bg-elevated); }
+  .conv-item.active{ background:var(--accent-soft); }
+  .conv-item .dot{ position:absolute; bottom:11px; right:33px; width:10px; height:10px; border-radius:50%; background:var(--green); border:2px solid var(--bg-card); }
+  .conv-name{ font-weight:800; font-size:13.8px; display:flex; justify-content:space-between; }
+  .conv-name time{ font-size:11px; color:var(--text-faint); font-weight:500; }
+  .conv-last{ font-size:12.5px; color:var(--text-faint); margin-top:2px; }
+  .conv-unread{ background:var(--accent); color:#fff; font-size:10.5px; font-weight:800; border-radius:99px; min-width:18px; height:18px; display:flex; align-items:center; justify-content:center; padding:0 5px; margin-inline-start:auto; }
+
+  .chat-pane{ display:flex; flex-direction:column; }
+  .chat-head{ display:flex; align-items:center; gap:12px; padding:14px 20px; border-bottom:1px solid var(--border-soft); }
+  .chat-head .status{ font-size:12px; color:var(--green); }
+  .chat-body{ flex:1; overflow:auto; padding:20px; display:flex; flex-direction:column; gap:12px; }
+  .bubble{ max-width:62%; padding:10px 15px; border-radius:16px; font-size:13.8px; line-height:1.5; }
+  .bubble.in{ background:var(--bg-elevated); align-self:flex-start; border-bottom-left-radius:4px; }
+  .bubble.out{ background:linear-gradient(135deg,var(--accent),#7048e8); color:#fff; align-self:flex-end; border-bottom-right-radius:4px; }
+  .bubble time{ display:block; font-size:10px; opacity:.7; margin-top:4px; }
+  .typing{ align-self:flex-start; display:flex; gap:4px; padding:10px 15px; background:var(--bg-elevated); border-radius:16px; }
+  .typing span{ width:6px; height:6px; border-radius:50%; background:var(--text-faint); animation:blink 1.2s infinite ease-in-out; }
+  .typing span:nth-child(2){ animation-delay:.2s; } .typing span:nth-child(3){ animation-delay:.4s; }
+  @keyframes blink{ 0%,80%,100%{ opacity:.25 } 40%{ opacity:1 } }
+  .chat-input{ display:flex; gap:10px; padding:16px 20px; border-top:1px solid var(--border-soft); }
+  .chat-input input{ flex:1; background:var(--bg-input); border:1px solid var(--border); border-radius:99px; padding:11px 17px; font-size:13.8px; }
+  .chat-input input:focus{ border-color:var(--accent); }
+  @media (max-width:760px){ .msg-shell{ grid-template-columns:1fr; height:calc(100vh - 68px); } .conv-list.hide-mobile{display:none;} }
+</style>
+</head>
+<body data-page="messages">
+
+<header class="topbar">
+  <a href="index.html" class="brand"><div class="brand__mark">🌍</div><div class="brand__name">World<span>Hub</span></div></a>
+  <div class="topbar__search"><span id="ic-search"></span><input type="text" placeholder="ابحث..."><span class="kbd">⌘K</span></div>
+  <div class="topbar__actions">
+    <a href="notifications.html" class="icon-btn"><span class="badge">8</span><span id="ic-bell"></span></a>
+    <a href="profile.html"><img class="avatar" width="40" height="40" src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=200&auto=format&fit=crop"></a>
+  </div>
+</header>
+
+<div class="layout layout--narrow">
+  <aside class="col-right col-sticky">
+    <nav class="nav">
+      <a href="index.html" class="nav__link" data-page="home">${nav-home}<span>الرئيسية</span></a>
+      <a href="reels.html" class="nav__link" data-page="reels">${nav-reels}<span>الريلز</span></a>
+      <a href="messages.html" class="nav__link" data-page="messages">${nav-messages}<span>الرسائل</span></a>
+      <a href="notifications.html" class="nav__link" data-page="notifications">${nav-bell}<span>الإشعارات</span></a>
+      <a href="worlds.html" class="nav__link" data-page="worlds">${nav-globe}<span>العوالم</span></a>
+      <a href="dashboard.html" class="nav__link" data-page="dashboard">${nav-dashboard}<span>لوحة المعلومات</span></a>
+      <a href="profile.html" class="nav__link" data-page="profile">${nav-user}<span>الملف الشخصي</span></a>
+    </nav>
+  </aside>
+
+  <main class="col-center" style="max-width:1000px;">
+    <div class="card msg-shell" id="msgShell"></div>
+  </main>
+</div>
+
+<script src="app.js"></script>
+<script>
+  const iconMap = {'ic-search':'search','ic-bell':'bell','nav-home':'home','nav-reels':'reels','nav-messages':'messages','nav-bell':'bell','nav-globe':'globe','nav-dashboard':'dashboard','nav-user':'user'};
+  document.body.innerHTML = document.body.innerHTML.replace(/\$\{([a-z0-9\-]+)\}/g, (_, key) => WH.ICONS[iconMap[key]] || '');
+
+  const convs = [
+    { id:'sarah', last:'شكراً على المشاركة! 🙌', time:'الآن', unread:2, online:true,
+      thread:[{from:'them',text:'مرحباً! شفت منشورك عن جافاسكربت، رائع جداً',time:'10:02'},
+              {from:'me',text:'أشكرك كثيراً! سعيد أنه أفادك 🙏',time:'10:05'},
+              {from:'them',text:'شكراً على المشاركة! 🙌',time:'10:07'}] },
+    { id:'alex', last:'هل جربت النموذج الجديد؟', time:'09:14', unread:0, online:true,
+      thread:[{from:'them',text:'هل جربت النموذج الجديد؟',time:'09:14'}] },
+    { id:'john', last:'أرسلت لك تصميم الواجهة', time:'أمس', unread:0, online:false,
+      thread:[{from:'them',text:'أرسلت لك تصميم الواجهة، عطني رأيك',time:'أمس'}] },
+    { id:'lina', last:'أنت: بالتوفيق في الإطلاق!', time:'الإثنين', unread:0, online:false,
+      thread:[{from:'me',text:'بالتوفيق في الإطلاق!',time:'الإثنين'}] },
+  ];
+
+  let active = convs[0].id;
+
+  function renderShell(){
+    const shell = document.getElementById('msgShell');
+    const list = convs.map(c=>{
+      const p = WH.person(c.id);
+      return `<div class="conv-item ${c.id===active?'active':''}" data-id="${c.id}">
+        ${WH.avatarHTML(p,44)} ${c.online?'<span class="dot"></span>':''}
+        <div style="flex:1;min-width:0">
+          <div class="conv-name"><span>${p.name}</span><time>${c.time}</time></div>
+          <div class="conv-last truncate">${c.last}</div>
+        </div>
+        ${c.unread?`<span class="conv-unread">${c.unread}</span>`:''}
+      </div>`;
+    }).join('');
+
+    const conv = convs.find(c=>c.id===active);
+    const p = WH.person(active);
+    const bubbles = conv.thread.map(m=>`<div class="bubble ${m.from==='me'?'out':'in'}">${m.text}<time>${m.time}</time></div>`).join('');
+
+    shell.innerHTML = `
+      <div class="conv-list">
+        <div class="conv-search"><input placeholder="ابحث في المحادثات..."></div>
+        ${list}
+      </div>
+      <div class="chat-pane">
+        <div class="chat-head">${WH.avatarHTML(p,40)}<div><div class="fw-800">${p.name}</div><div class="status">${conv.online?'متصل الآن':'غير متصل'}</div></div></div>
+        <div class="chat-body" id="chatBody">${bubbles}</div>
+        <form class="chat-input" id="chatForm">
+          <input type="text" placeholder="اكتب رسالة..." id="chatInput" required>
+          <button type="submit" class="btn btn-primary btn-sm">إرسال</button>
+        </form>
+      </div>`;
+
+    shell.querySelectorAll('.conv-item').forEach(el=>el.addEventListener('click', ()=>{ active = el.dataset.id; renderShell(); }));
+    const body = document.getElementById('chatBody'); body.scrollTop = body.scrollHeight;
+
+    document.getElementById('chatForm').addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const input = document.getElementById('chatInput');
+      if(!input.value.trim()) return;
+      conv.thread.push({from:'me', text:input.value.trim(), time:'الآن'});
+      conv.last = 'أنت: ' + input.value.trim();
+      input.value='';
+      renderShell();
+      const b = document.getElementById('chatBody'); b.innerHTML += `<div class="typing"><span></span><span></span><span></span></div>`; b.scrollTop = b.scrollHeight;
+      setTimeout(()=>{
+        conv.thread.push({from:'them', text:'تمام، وصلتني رسالتك 👍', time:'الآن'});
+        renderShell();
+      }, 1400);
+    });
+  }
+  renderShell();
+</script>
+</body>
+</html>

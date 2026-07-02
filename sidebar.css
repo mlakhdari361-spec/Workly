@@ -1,0 +1,87 @@
+/* =========================================================
+   WorldHub — sidebar.css
+   القائمة اليمنى (التنقل) + العمود الأيسر (الاستكشاف)
+   ========================================================= */
+
+/* ---- Right nav (main navigation) ---- */
+.nav{
+  display:flex; flex-direction:column; gap:2px;
+}
+.nav__link{
+  display:flex; align-items:center; gap:13px;
+  padding:11px 14px; border-radius: var(--radius-sm);
+  color: var(--text-dim); font-weight:700; font-size:14.5px;
+  position:relative;
+}
+.nav__link svg{ width:20px; height:20px; flex-shrink:0; }
+.nav__link:hover{ background: var(--bg-elevated); color:var(--text); }
+.nav__link.active{
+  background: var(--accent-soft); color:var(--accent-2);
+}
+.nav__link .badge-count{
+  margin-inline-start:auto;
+  background:var(--accent); color:#fff; font-size:11px; font-weight:800;
+  min-width:20px; height:20px; border-radius:99px;
+  display:flex; align-items:center; justify-content:center; padding:0 5px;
+}
+.nav__link.active .badge-count{ background:var(--accent); }
+
+.nav__create{ margin:14px 0 10px; }
+
+.nav__divider{ height:1px; background:var(--border-soft); margin:14px 4px; }
+.nav__label{ font-size:11.5px; font-weight:800; color:var(--text-faint); padding:6px 14px 8px; letter-spacing:.3px; }
+
+.nav__world{ display:flex; align-items:center; gap:11px; padding:9px 14px; border-radius:var(--radius-sm); color:var(--text-dim); font-size:14px; font-weight:600; }
+.nav__world:hover{ background:var(--bg-elevated); color:var(--text); }
+.nav__world-icon{
+  width:26px; height:26px; border-radius:8px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:13px;
+}
+
+.side-footer{ padding:16px 14px 0; color:var(--text-faint); font-size:11.5px; display:flex; align-items:center; gap:8px; }
+.side-footer .brand__mark{ width:22px; height:22px; font-size:12px; border-radius:7px; }
+
+@media (max-width:1180px){
+  .nav__link span:not(.badge-count), .nav__world span, .nav__label, .nav__create span, .side-footer span, .brand__name{ display:none; }
+  .nav__link, .nav__world{ justify-content:center; padding:12px; }
+  .nav__link svg{ width:22px; height:22px; }
+  .nav__link .badge-count{ position:absolute; top:2px; left:2px; margin:0; min-width:16px; height:16px; font-size:9px; }
+  .nav__create .btn{ width:44px; height:44px; padding:0; border-radius:50%; }
+  .nav__create .btn span{ display:none; }
+}
+
+/* ---- Discover column (right-hand rail in the reference / left rail in RTL) ---- */
+.discover-item{
+  display:flex; align-items:center; gap:12px;
+  padding:10px 18px;
+}
+.discover-item__icon{
+  width:38px; height:38px; border-radius:11px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:18px;
+}
+.discover-item__name{ font-weight:700; font-size:13.8px; }
+.discover-item__meta{ font-size:12px; color:var(--text-faint); }
+.discover-item .btn{ margin-inline-start:auto; }
+
+.trend-item{ padding:8px 18px; }
+.trend-item a{ font-weight:800; color:var(--accent-2); font-size:14px; }
+.trend-item a:hover{ text-decoration:underline; }
+
+.member-item{ display:flex; align-items:center; gap:10px; padding:9px 18px; }
+.member-item__rank{ width:20px; text-align:center; font-weight:800; color:var(--text-faint); font-size:13px; }
+.member-item__name{ font-weight:700; font-size:13.5px; }
+.member-item__pts{ margin-inline-start:auto; font-size:12px; color:var(--gold); font-weight:800; }
+
+.event-item{ display:flex; gap:12px; padding:10px 18px; }
+.event-item__date{
+  flex-shrink:0; width:46px; height:46px; border-radius:10px;
+  background:var(--bg-elevated); border:1px solid var(--border);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  font-size:10px; font-weight:800; color:var(--accent-2); line-height:1.2;
+}
+.event-item__date b{ font-size:15px; color:var(--text); }
+.event-item__title{ font-weight:700; font-size:13.3px; }
+.event-item__meta{ font-size:11.5px; color:var(--text-faint); }
+
+.rail-panel + .rail-panel{ margin-top:20px; }
+.rail-panel .panel-body{ padding-bottom:14px; }

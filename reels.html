@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WorldHub — الريلز</title>
+<link rel="stylesheet" href="main.css">
+<link rel="stylesheet" href="sidebar.css">
+<style>
+  .reels-wrap{ display:flex; justify-content:center; }
+  .reel{
+    position:relative; width:380px; height:calc(100vh - 68px - 48px); border-radius:24px; overflow:hidden;
+    background:linear-gradient(160deg,#1a1230,#0a0a12); border:1px solid var(--border-soft);
+  }
+  .reel img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.85; }
+  .reel::after{ content:''; position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,.85), transparent 45%); }
+  .reel-info{ position:absolute; bottom:0; right:0; left:0; padding:20px; z-index:2; }
+  .reel-user{ display:flex; align-items:center; gap:9px; margin-bottom:8px; }
+  .reel-user b{ font-size:14px; }
+  .reel-caption{ font-size:13.5px; color:#e9e7f4; line-height:1.5; }
+  .reel-actions{ position:absolute; left:14px; bottom:110px; display:flex; flex-direction:column; gap:20px; z-index:2; align-items:center; }
+  .reel-action{ display:flex; flex-direction:column; align-items:center; gap:4px; color:#fff; font-size:11.5px; font-weight:700; }
+  .reel-action button{ width:44px; height:44px; border-radius:50%; background:rgba(255,255,255,.12); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; }
+  .reel-action button.liked{ color:var(--red); }
+  .reel-action svg{ width:21px; height:21px; }
+  .reel-nav{ display:flex; flex-direction:column; gap:14px; justify-content:center; }
+  .reel-nav button{ width:44px; height:44px; border-radius:50%; background:var(--bg-elevated); border:1px solid var(--border); }
+  .reel-nav button:hover{ background:var(--accent-soft); color:var(--accent-2); }
+</style>
+</head>
+<body data-page="reels">
+
+<header class="topbar">
+  <a href="index.html" class="brand"><div class="brand__mark">🌍</div><div class="brand__name">World<span>Hub</span></div></a>
+  <div class="topbar__search"><span id="ic-search"></span><input type="text" placeholder="ابحث..."><span class="kbd">⌘K</span></div>
+  <div class="topbar__actions">
+    <a href="notifications.html" class="icon-btn"><span class="badge">8</span><span id="ic-bell"></span></a>
+    <a href="messages.html" class="icon-btn"><span class="badge">3</span><span id="ic-msg"></span></a>
+    <a href="profile.html"><img class="avatar" width="40" height="40" src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=200&auto=format&fit=crop"></a>
+  </div>
+</header>
+
+<div class="layout layout--narrow">
+  <aside class="col-right col-sticky">
+    <nav class="nav">
+      <a href="index.html" class="nav__link" data-page="home">${nav-home}<span>الرئيسية</span></a>
+      <a href="reels.html" class="nav__link" data-page="reels">${nav-reels}<span>الريلز</span></a>
+      <a href="messages.html" class="nav__link" data-page="messages">${nav-messages}<span>الرسائل</span></a>
+      <a href="notifications.html" class="nav__link" data-page="notifications">${nav-bell}<span>الإشعارات</span></a>
+      <a href="worlds.html" class="nav__link" data-page="worlds">${nav-globe}<span>العوالم</span></a>
+      <a href="dashboard.html" class="nav__link" data-page="dashboard">${nav-dashboard}<span>لوحة المعلومات</span></a>
+      <a href="profile.html" class="nav__link" data-page="profile">${nav-user}<span>الملف الشخصي</span></a>
+    </nav>
+  </aside>
+
+  <main class="col-center">
+    <div class="reels-wrap gap-16 items-center" style="display:flex;">
+      <div class="reel-nav">
+        <button id="prevReel">▲</button>
+        <button id="nextReel">▼</button>
+      </div>
+      <div class="reel" id="reelCard"></div>
+      <div class="reel-actions" id="reelActions"></div>
+    </div>
+  </main>
+</div>
+
+<script src="app.js"></script>
+<script>
+  const iconMap = {'ic-search':'search','ic-bell':'bell','ic-msg':'messages','nav-home':'home','nav-reels':'reels','nav-messages':'messages','nav-bell':'bell','nav-globe':'globe','nav-dashboard':'dashboard','nav-user':'user'};
+  document.body.innerHTML = document.body.innerHTML.replace(/\$\{([a-z0-9\-]+)\}/g, (_, key) => WH.ICONS[iconMap[key]] || '');
+
+  const REELS = [
+    { id:'r1', author:'alex', img:'https://images.unsplash.com/photo-1677442136019-21780ecad995?q=80&w=800&auto=format&fit=crop', caption:'كيف تبني نموذج ذكاء اصطناعي في 60 ثانية 🤖', likes:1200, comments:88, world:'ai' },
+    { id:'r2', author:'sarah', img:'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=800&auto=format&fit=crop', caption:'3 حيل في CSS لا يعرفها أغلب المطورين 💻', likes:940, comments:64, world:'programming' },
+    { id:'r3', author:'john', img:'https://images.unsplash.com/photo-1561070791-2526d30994b5?q=80&w=800&auto=format&fit=crop', caption:'مبادئ التصميم البصري في دقيقة واحدة 🎨', likes:730, comments:41, world:'design' },
+    { id:'r4', author:'lina', img:'https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=800&auto=format&fit=crop', caption:'نصائح لريادة الأعمال من مؤسِّسة ناجحة 💼', likes:1050, comments:97, world:'business' },
+  ];
+  let idx = 0;
+  const liked = {};
+
+  function render(){
+    const r = REELS[idx];
+    const p = WH.person(r.author);
+    const w = WH.world(r.world);
+    document.getElementById('reelCard').innerHTML = `
+      <img src="${r.img}" alt="">
+      <div class="reel-info">
+        <div class="reel-user">${WH.avatarHTML(p,36)} <b>${p.name}</b> <span class="pill-tag">${w.icon} ${w.name}</span></div>
+        <div class="reel-caption">${r.caption}</div>
+      </div>`;
+    document.getElementById('reelActions').innerHTML = `
+      <div class="reel-action"><button id="likeReel" class="${liked[r.id]?'liked':''}">${WH.ICONS.heart}</button><span>${WH.fmt(r.likes + (liked[r.id]?1:0))}</span></div>
+      <div class="reel-action"><button>${WH.ICONS.comment}</button><span>${WH.fmt(r.comments)}</span></div>
+      <div class="reel-action"><button>${WH.ICONS.share}</button><span>مشاركة</span></div>`;
+    document.getElementById('likeReel').addEventListener('click', ()=>{ liked[r.id] = !liked[r.id]; render(); });
+  }
+  render();
+  document.getElementById('nextReel').addEventListener('click', ()=>{ idx = (idx+1)%REELS.length; render(); });
+  document.getElementById('prevReel').addEventListener('click', ()=>{ idx = (idx-1+REELS.length)%REELS.length; render(); });
+</script>
+</body>
+</html>

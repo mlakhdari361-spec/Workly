@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WorldHub — لوحة المعلومات</title>
+<link rel="stylesheet" href="main.css">
+<link rel="stylesheet" href="sidebar.css">
+<style>
+  .stat-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+  @media (max-width:900px){ .stat-grid{ grid-template-columns:repeat(2,1fr);} }
+  .stat-card{ padding:20px; }
+  .stat-card .ic{ width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:17px; margin-bottom:10px; }
+  .stat-card b{ font-family:var(--font-display); font-size:24px; display:block; }
+  .stat-card .lbl{ color:var(--text-faint); font-size:12.5px; margin-top:2px; }
+  .stat-card .delta{ font-size:11.5px; color:var(--green); font-weight:800; margin-top:8px; }
+  .bars{ display:flex; align-items:flex-end; gap:10px; height:160px; padding:10px 4px; }
+  .bar{ flex:1; background:linear-gradient(180deg,var(--accent-2),var(--accent)); border-radius:8px 8px 0 0; position:relative; }
+  .bar span{ position:absolute; bottom:-22px; right:0; left:0; text-align:center; font-size:11px; color:var(--text-faint); }
+  .top-post-row{ display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid var(--border-soft); }
+  .top-post-row:last-child{ border-bottom:none; }
+</style>
+</head>
+<body data-page="dashboard">
+
+<header class="topbar">
+  <a href="index.html" class="brand"><div class="brand__mark">🌍</div><div class="brand__name">World<span>Hub</span></div></a>
+  <div class="topbar__search"><span id="ic-search"></span><input type="text" placeholder="ابحث..."><span class="kbd">⌘K</span></div>
+  <div class="topbar__actions">
+    <a href="notifications.html" class="icon-btn"><span class="badge">8</span><span id="ic-bell"></span></a>
+    <a href="messages.html" class="icon-btn"><span class="badge">3</span><span id="ic-msg"></span></a>
+    <a href="profile.html"><img class="avatar" width="40" height="40" src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=200&auto=format&fit=crop"></a>
+  </div>
+</header>
+
+<div class="layout layout--narrow">
+  <aside class="col-right col-sticky">
+    <nav class="nav">
+      <a href="index.html" class="nav__link" data-page="home">${nav-home}<span>الرئيسية</span></a>
+      <a href="reels.html" class="nav__link" data-page="reels">${nav-reels}<span>الريلز</span></a>
+      <a href="messages.html" class="nav__link" data-page="messages">${nav-messages}<span>الرسائل</span></a>
+      <a href="notifications.html" class="nav__link" data-page="notifications">${nav-bell}<span>الإشعارات</span></a>
+      <a href="worlds.html" class="nav__link" data-page="worlds">${nav-globe}<span>العوالم</span></a>
+      <a href="dashboard.html" class="nav__link" data-page="dashboard">${nav-dashboard}<span>لوحة المعلومات</span></a>
+      <a href="profile.html" class="nav__link" data-page="profile">${nav-user}<span>الملف الشخصي</span></a>
+    </nav>
+  </aside>
+
+  <main class="col-center" style="max-width:900px;">
+    <div class="section-heading">لوحة المعلومات 📊</div>
+    <div class="section-sub mb-16">نظرة عامة على نشاطك خلال آخر 30 يوماً</div>
+
+    <div class="stat-grid mb-16">
+      <div class="card stat-card"><div class="ic" style="background:#8b5cf622;color:#8b5cf6">📝</div><b id="statPosts"></b><div class="lbl">منشور</div><div class="delta">+12% ↑</div></div>
+      <div class="card stat-card"><div class="ic" style="background:#ef444422;color:#ef4444">❤️</div><b id="statLikes"></b><div class="lbl">إعجاب</div><div class="delta">+8% ↑</div></div>
+      <div class="card stat-card"><div class="ic" style="background:#3b82f622;color:#3b82f6">💬</div><b id="statComments"></b><div class="lbl">تعليق</div><div class="delta">+21% ↑</div></div>
+      <div class="card stat-card"><div class="ic" style="background:#22c55e22;color:#22c55e">👥</div><b id="statFollowers"></b><div class="lbl">متابع</div><div class="delta">+5% ↑</div></div>
+    </div>
+
+    <div class="card card-pad mb-16">
+      <div class="panel-title" style="padding:0 0 14px;">نشاط الحساب — آخر 7 أيام</div>
+      <div class="bars" id="barsChart"></div>
+    </div>
+
+    <div class="card card-pad">
+      <div class="panel-title" style="padding:0 0 10px;">أكثر منشوراتك نجاحاً</div>
+      <div id="topPosts"></div>
+    </div>
+  </main>
+</div>
+
+<script src="app.js"></script>
+<script>
+  const iconMap = {'ic-search':'search','ic-bell':'bell','ic-msg':'messages','nav-home':'home','nav-reels':'reels','nav-messages':'messages','nav-bell':'bell','nav-globe':'globe','nav-dashboard':'dashboard','nav-user':'user'};
+  document.body.innerHTML = document.body.innerHTML.replace(/\$\{([a-z0-9\-]+)\}/g, (_, key) => WH.ICONS[iconMap[key]] || '');
+
+  const me = WH.person('alex');
+  document.getElementById('statPosts').textContent = WH.state.posts.filter(p=>p.author===me.id).length;
+  document.getElementById('statLikes').textContent = WH.fmt(WH.state.posts.reduce((s,p)=>s+p.likes,0));
+  document.getElementById('statComments').textContent = WH.fmt(WH.state.posts.reduce((s,p)=>s+p.comments,0));
+  document.getElementById('statFollowers').textContent = WH.fmt(me.followers);
+
+  const days = ['السبت','الجمعة','الخميس','الأربعاء','الثلاثاء','الاثنين','الأحد'];
+  const values = [40,65,30,80,55,95,70];
+  document.getElementById('barsChart').innerHTML = values.map((v,i)=>`<div class="bar" style="height:${v}%"><span>${days[i]}</span></div>`).join('');
+
+  document.getElementById('topPosts').innerHTML = [...WH.state.posts].sort((a,b)=>b.likes-a.likes).slice(0,3).map(p=>{
+    const a = WH.person(p.author);
+    return `<div class="top-post-row">${WH.avatarHTML(a,38)}<div style="flex:1;min-width:0" class="truncate">${p.text}</div><div class="text-faint" style="font-size:12px;white-space:nowrap;">❤️ ${WH.fmt(p.likes)} · 💬 ${WH.fmt(p.comments)}</div></div>`;
+  }).join('');
+</script>
+</body>
+</html>

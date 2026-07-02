@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WorldHub — استكشاف العوالم</title>
+<link rel="stylesheet" href="main.css">
+<link rel="stylesheet" href="sidebar.css">
+<style>
+  .worlds-hero{ padding:34px 6px 22px; }
+  .worlds-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  @media (max-width:1000px){ .worlds-grid{ grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:640px){ .worlds-grid{ grid-template-columns:1fr;} }
+  .world-card{ padding:20px; display:flex; flex-direction:column; gap:12px; }
+  .world-card__top{ display:flex; align-items:center; gap:12px; }
+  .world-card__icon{ width:48px; height:48px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:23px; }
+  .world-card__name{ font-family:var(--font-display); font-weight:800; font-size:16px; }
+  .world-card__meta{ font-size:12px; color:var(--text-faint); }
+  .world-card__desc{ font-size:13px; color:var(--text-dim); line-height:1.6; }
+  .world-card__stats{ display:flex; gap:16px; font-size:11.5px; color:var(--text-faint); }
+  .world-card__stats b{ color:var(--text); }
+  .create-world-card{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:30px; border:1.5px dashed var(--border); color:var(--text-dim); }
+  .create-world-card:hover{ border-color:var(--accent); color:var(--accent-2); }
+</style>
+</head>
+<body data-page="worlds">
+
+<header class="topbar">
+  <a href="index.html" class="brand"><div class="brand__mark">🌍</div><div class="brand__name">World<span>Hub</span></div></a>
+  <div class="topbar__search"><span id="ic-search"></span><input type="text" placeholder="ابحث عن عالم..." id="worldSearchInput"><span class="kbd">⌘K</span></div>
+  <div class="topbar__actions">
+    <a href="notifications.html" class="icon-btn"><span class="badge">8</span><span id="ic-bell"></span></a>
+    <a href="messages.html" class="icon-btn"><span class="badge">3</span><span id="ic-msg"></span></a>
+    <a href="profile.html"><img class="avatar" width="40" height="40" src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=200&auto=format&fit=crop"></a>
+  </div>
+</header>
+
+<div class="layout layout--narrow">
+  <aside class="col-right col-sticky">
+    <nav class="nav">
+      <a href="index.html" class="nav__link" data-page="home">${nav-home}<span>الرئيسية</span></a>
+      <a href="reels.html" class="nav__link" data-page="reels">${nav-reels}<span>الريلز</span></a>
+      <a href="messages.html" class="nav__link" data-page="messages">${nav-messages}<span>الرسائل</span></a>
+      <a href="notifications.html" class="nav__link" data-page="notifications">${nav-bell}<span>الإشعارات</span></a>
+      <a href="worlds.html" class="nav__link" data-page="worlds">${nav-globe}<span>العوالم</span></a>
+      <a href="dashboard.html" class="nav__link" data-page="dashboard">${nav-dashboard}<span>لوحة المعلومات</span></a>
+      <a href="profile.html" class="nav__link" data-page="profile">${nav-user}<span>الملف الشخصي</span></a>
+    </nav>
+  </aside>
+
+  <main class="col-center" style="max-width:1000px;">
+    <div class="worlds-hero">
+      <div class="section-heading">استكشف العوالم 🌍</div>
+      <div class="section-sub">اختر عالمك المتخصص وانضم إلى مجتمعه: منشورات، وظائف، فعاليات ونقاشات.</div>
+    </div>
+    <div class="worlds-grid" id="worldsGrid"></div>
+  </main>
+</div>
+
+<script src="app.js"></script>
+<script>
+  const iconMap = {'ic-search':'search','ic-bell':'bell','ic-msg':'messages','nav-home':'home','nav-reels':'reels','nav-messages':'messages','nav-bell':'bell','nav-globe':'globe','nav-dashboard':'dashboard','nav-user':'user'};
+  document.body.innerHTML = document.body.innerHTML.replace(/\$\{([a-z0-9\-]+)\}/g, (_, key) => WH.ICONS[iconMap[key]] || '');
+
+  function renderGrid(filter=''){
+    const grid = document.getElementById('worldsGrid');
+    const list = WH.WORLDS.filter(w=> w.name.includes(filter));
+    grid.innerHTML = list.map(w=>`
+      <div class="card world-card">
+        <div class="world-card__top">
+          <div class="world-card__icon" style="background:${w.color}22;color:${w.color}">${w.icon}</div>
+          <div>
+            <div class="world-card__name">${w.name}</div>
+            <div class="world-card__meta">${WH.fmt(w.members)} عضو · ${WH.fmt(w.posts)} منشور</div>
+          </div>
+        </div>
+        <div class="world-card__desc">${w.desc}</div>
+        <div class="world-card__stats">
+          <span>👥 <b>${WH.fmt(w.members)}</b> عضو</span>
+          <span>💼 <b>${w.jobs}</b> وظيفة</span>
+        </div>
+        <button class="btn ${WH.state.joined[w.id]?'btn-secondary':'btn-primary'} btn-block join-btn" data-world="${w.id}">${WH.state.joined[w.id]?'✓ منضم — عرض العالم':'انضمام إلى العالم'}</button>
+      </div>`).join('') + `<div class="card create-world-card"><div style="font-size:30px">➕</div><div class="fw-700">إنشاء عالم جديد</div><div style="font-size:12px">ابدأ مجتمعك المتخصص الخاص</div></div>`;
+
+    grid.querySelectorAll('.join-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const id = btn.dataset.world;
+        WH.state.joined[id] = !WH.state.joined[id]; WH.save();
+        WH.toast(WH.state.joined[id] ? `انضممت إلى عالم ${WH.world(id).name} 🎉` : 'تمت مغادرة العالم');
+        renderGrid(document.getElementById('worldSearchInput').value);
+      });
+    });
+  }
+  renderGrid();
+  document.getElementById('worldSearchInput').addEventListener('input', (e)=> renderGrid(e.target.value));
+</script>
+</body>
+</html>

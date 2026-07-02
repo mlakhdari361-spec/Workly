@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WorldHub — الإشعارات</title>
+<link rel="stylesheet" href="main.css">
+<link rel="stylesheet" href="sidebar.css">
+<link rel="stylesheet" href="tabs.css">
+<style>
+  .notif{ display:flex; gap:13px; align-items:flex-start; padding:15px 20px; border-bottom:1px solid var(--border-soft); position:relative; }
+  .notif:hover{ background:var(--bg-elevated); }
+  .notif.unread::before{ content:''; position:absolute; top:22px; left:14px; width:8px; height:8px; border-radius:50%; background:var(--accent); }
+  .notif-icon{ width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+  .notif-text b{ font-weight:800; }
+  .notif-time{ font-size:12px; color:var(--text-faint); margin-top:3px; }
+</style>
+</head>
+<body data-page="notifications">
+
+<header class="topbar">
+  <a href="index.html" class="brand"><div class="brand__mark">🌍</div><div class="brand__name">World<span>Hub</span></div></a>
+  <div class="topbar__search"><span id="ic-search"></span><input type="text" placeholder="ابحث..."><span class="kbd">⌘K</span></div>
+  <div class="topbar__actions">
+    <a href="messages.html" class="icon-btn"><span class="badge">3</span><span id="ic-msg"></span></a>
+    <a href="profile.html"><img class="avatar" width="40" height="40" src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=200&auto=format&fit=crop"></a>
+  </div>
+</header>
+
+<div class="layout layout--narrow">
+  <aside class="col-right col-sticky">
+    <nav class="nav">
+      <a href="index.html" class="nav__link" data-page="home">${nav-home}<span>الرئيسية</span></a>
+      <a href="reels.html" class="nav__link" data-page="reels">${nav-reels}<span>الريلز</span></a>
+      <a href="messages.html" class="nav__link" data-page="messages">${nav-messages}<span>الرسائل</span></a>
+      <a href="notifications.html" class="nav__link" data-page="notifications">${nav-bell}<span>الإشعارات</span></a>
+      <a href="worlds.html" class="nav__link" data-page="worlds">${nav-globe}<span>العوالم</span></a>
+      <a href="dashboard.html" class="nav__link" data-page="dashboard">${nav-dashboard}<span>لوحة المعلومات</span></a>
+      <a href="profile.html" class="nav__link" data-page="profile">${nav-user}<span>الملف الشخصي</span></a>
+    </nav>
+  </aside>
+
+  <main class="col-center" style="max-width:640px;">
+    <div class="card">
+      <div class="feed-tabs">
+        <button class="feed-tabs__link active">الكل</button>
+        <button class="feed-tabs__link">الإعجابات</button>
+        <button class="feed-tabs__link">التعليقات</button>
+        <button class="feed-tabs__link">المتابعون</button>
+      </div>
+      <div id="notifList"></div>
+    </div>
+  </main>
+</div>
+
+<script src="app.js"></script>
+<script>
+  const iconMap = {'ic-search':'search','ic-msg':'messages','nav-home':'home','nav-reels':'reels','nav-messages':'messages','nav-bell':'bell','nav-globe':'globe','nav-dashboard':'dashboard','nav-user':'user'};
+  document.body.innerHTML = document.body.innerHTML.replace(/\$\{([a-z0-9\-]+)\}/g, (_, key) => WH.ICONS[iconMap[key]] || '');
+
+  const NOTIFS = [
+    { id:'sarah', type:'like', text:'أعجبت بمنشورك في عالم البرمجة', time:'قبل 5 دقائق', unread:true, icon:'❤️', color:'#ef4444' },
+    { id:'alex',  type:'comment', text:'علّق على منشورك: "فكرة رائعة!"', time:'قبل 20 دقيقة', unread:true, icon:'💬', color:'#3b82f6' },
+    { id:'john',  type:'follow', text:'بدأ بمتابعتك', time:'قبل ساعة', unread:true, icon:'➕', color:'#22c55e' },
+    { id:'lina',  type:'like', text:'أعجبت بتعليقك', time:'قبل 3 ساعات', unread:true, icon:'❤️', color:'#ef4444' },
+    { id:'alex',  type:'world', text:'نشر تحديثاً في عالم الذكاء الاصطناعي الذي انضممت إليه', time:'أمس', unread:false, icon:'🌍', color:'#8b5cf6' },
+    { id:'sarah', type:'comment', text:'ردّت على تعليقك', time:'أمس', unread:false, icon:'💬', color:'#3b82f6' },
+    { id:'john',  type:'follow', text:'بدأ بمتابعتك', time:'قبل يومين', unread:false, icon:'➕', color:'#22c55e' },
+  ];
+
+  document.getElementById('notifList').innerHTML = NOTIFS.map(n=>{
+    const p = WH.person(n.id);
+    return `<div class="notif ${n.unread?'unread':''}">
+      ${WH.avatarHTML(p,42)}
+      <div class="notif-icon" style="background:${n.color}22;color:${n.color};position:relative;margin-inline-start:-16px;margin-top:22px;">${n.icon}</div>
+      <div class="notif-text">
+        <div><b>${p.name}</b> ${n.text}</div>
+        <div class="notif-time">${n.time}</div>
+      </div>
+    </div>`;
+  }).join('');
+</script>
+</body>
+</html>
