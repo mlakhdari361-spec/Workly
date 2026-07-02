@@ -2,9 +2,9 @@
    WorldHub — app.js
    بيانات تجريبية + منطق الواجهة (بدون خادم — localStorage)
    ========================================================= */
- 
+
 const WH = (() => {
- 
+
   const ICONS = {
     home:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/></svg>`,
     reels:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 3v18M16 3v18M3 8h5M3 16h5M16 8h5M16 16h5"/></svg>`,
@@ -30,7 +30,7 @@ const WH = (() => {
     video:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5.5" width="14" height="13" rx="2.5"/><path d="m21.5 8-5 3 5 3z"/></svg>`,
     poll:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M12 20V4M20 20v-7"/></svg>`,
   };
- 
+
   const WORLDS = [
     { id:'programming', name:'البرمجة',        icon:'💻', color:'#22c55e', members:12500, posts:4500, jobs:120, desc:'كل ما يخص البرمجة، اللغات، والأطر.' },
     { id:'ai',           name:'الذكاء الاصطناعي', icon:'🤖', color:'#8b5cf6', members:8700,  posts:3100, jobs:64,  desc:'نماذج اللغة، التعلم الآلي، والأتمتة.' },
@@ -43,7 +43,7 @@ const WH = (() => {
     { id:'finance',      name:'المالية',        icon:'📈', color:'#14b8a6', members:2400,  posts:870,  jobs:22,  desc:'الاستثمار، الأسواق، والتخطيط المالي.' },
     { id:'relations',    name:'العلاقات',       icon:'❤️', color:'#f43f5e', members:1800,  posts:640,  jobs:0,   desc:'نقاشات حول العلاقات والحياة الاجتماعية.' },
   ];
- 
+
   const PEOPLE = [
     { id:'sarah',  name:'Sarah Parker', handle:'@sarah.parker', verified:true,  avatar:'S', color:'#ec4899', bio:'مهندسة برمجيات · تكتب عن جافاسكربت والويب الحديث', points:8700, followers:4210, following:180 },
     { id:'alex',   name:'Alex Dev',     handle:'@alex.dev',     verified:true,  avatar:'A', color:'#8b5cf6', bio:'باحث ذكاء اصطناعي · بناء المستقبل خوارزمية تلو الأخرى', points:12400, followers:9800, following:120 },
@@ -51,7 +51,7 @@ const WH = (() => {
     { id:'lina',   name:'Lina Haddad',  handle:'@lina.haddad',  verified:true,  avatar:'ل', color:'#f97316', bio:'رائدة أعمال · مؤسسة مشتركة لمنصة تعليمية', points:5100, followers:3400, following:210 },
     { id:'you',    name:'أنت',          handle:'@me',            verified:false, avatar:'ن', color:'#14b8a6', bio:'عضو في WorldHub', points:340, followers:56, following:112 },
   ];
- 
+
   const POSTS = [
     {
       id:'p1', author:'sarah', world:'programming', time:'قبل ساعتين',
@@ -77,7 +77,7 @@ const WH = (() => {
       likes:189, comments:24, shares:9,
     },
   ];
- 
+
   const COMMENTS_SEED = {
     p1: [
       { author:'alex', text:'نصائح رائعة! أضفت TypeScript إلى قائمتي هذا العام 👌' },
@@ -85,17 +85,17 @@ const WH = (() => {
     ],
     p2: [ { author:'sarah', text:'الصورة توضح الفكرة تماماً 😍' } ],
   };
- 
+
   const EVENTS = [
     { id:'e1', title:'Flutter World Conference', date:{m:'JUN', d:15}, place:'أونلاين', people:'1.2k مشارك' },
     { id:'e2', title:'AI & ML Summit 2026',       date:{m:'JUN', d:22}, place:'باريس، فرنسا', people:'850 مشارك' },
     { id:'e3', title:'ملتقى التصميم العربي',       date:{m:'JUL', d:9},  place:'دبي، الإمارات', people:'640 مشارك' },
   ];
- 
+
   const TRENDS = ['#JavaScript', '#Flutter', '#AI', '#Startups', '#WebDevelopment', '#Design'];
- 
+
   const KEY = 'worldhub_state_v1';
- 
+
   function load(){
     try{
       const raw = localStorage.getItem(KEY);
@@ -110,18 +110,18 @@ const WH = (() => {
   }
   let state = load();
   function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
- 
+
   function person(id){ return PEOPLE.find(p=>p.id===id); }
   function world(id){ return WORLDS.find(w=>w.id===id); }
- 
+
   function timeAgo(){ return 'الآن'; }
- 
+
   function fmt(n){
     if(n>=1000000) return (n/1000000).toFixed(1).replace('.0','')+'M';
     if(n>=1000) return (n/1000).toFixed(1).replace('.0','')+'k';
     return n;
   }
- 
+
   function toast(msg){
     let stack = document.querySelector('.toast-stack');
     if(!stack){ stack = document.createElement('div'); stack.className='toast-stack'; document.body.appendChild(stack); }
@@ -131,11 +131,11 @@ const WH = (() => {
     stack.appendChild(el);
     setTimeout(()=>{ el.style.opacity='0'; el.style.transition='opacity .25s'; setTimeout(()=>el.remove(),250); }, 2200);
   }
- 
+
   function avatarHTML(p, size=44){
     return `<div class="avatar" style="width:${size}px;height:${size}px;display:flex;align-items:center;justify-content:center;background:${p.color};color:#fff;font-weight:800;font-size:${size*0.4}px;">${p.avatar}</div>`;
   }
- 
+
   function postCardHTML(post){
     const a = person(post.author);
     const w = world(post.world);
@@ -173,7 +173,7 @@ const WH = (() => {
       </div>
     </article>`;
   }
- 
+
   function bindPostEvents(root){
     root.querySelectorAll('.post').forEach(el=>{
       const id = el.dataset.post;
@@ -198,14 +198,14 @@ const WH = (() => {
       });
     });
   }
- 
+
   let feedRootEl = null, feedFilter = 'foryou';
   function renderFeedIfPresent(){
     if(feedRootEl) renderFeed(feedRootEl, feedFilter);
   }
- 
+
   function isLive(){ return typeof DB !== 'undefined' && DB.isConnected; }
- 
+
   function renderFeed(root, filter='foryou'){
     feedRootEl = root; feedFilter = filter;
     if(isLive()){ renderFeedLive(root); return; }
@@ -217,7 +217,7 @@ const WH = (() => {
       `<div class="empty-state"><div class="icon">🌌</div><div class="fw-800">لا توجد منشورات هنا بعد</div><div class="text-dim mt-8">جرّب متابعة المزيد من الأشخاص أو الانضمام إلى عوالم جديدة.</div></div>`;
     bindPostEvents(root);
   }
- 
+
   function addPost({text, world:worldId}){
     if(isLive()){
       DB.createPost({ content:text, worldId: worldId || 'programming' })
@@ -229,9 +229,9 @@ const WH = (() => {
     state.posts.unshift({ id, author:'you', world: worldId || 'programming', time:'الآن', text, likes:0, comments:0, shares:0 });
     save();
   }
- 
+
   // ===================== وضع الاتصال الحقيقي (Supabase) =====================
- 
+
   function displayName(profile){
     const n = [profile.first_name, profile.last_name].filter(Boolean).join(' ');
     return n || (profile.handle || 'مستخدم');
@@ -250,7 +250,7 @@ const WH = (() => {
     if(s<86400) return `قبل ${Math.floor(s/3600)} س`;
     return `قبل ${Math.floor(s/86400)} يوم`;
   }
- 
+
   function livePostCardHTML(post, currentUserId){
     const a = post.author || {};
     const w = world(post.world_id) || { icon:'🌍', name:post.world_id };
@@ -283,7 +283,7 @@ const WH = (() => {
       </div>
     </article>`;
   }
- 
+
   async function renderFeedLive(root){
     root.innerHTML = `<div class="empty-state"><div class="icon">⏳</div>جارٍ تحميل المنشورات من قاعدة البيانات...</div>`;
     try{
@@ -296,7 +296,7 @@ const WH = (() => {
       root.innerHTML = `<div class="empty-state"><div class="icon">⚠️</div>تعذر تحميل المنشورات: ${err.message}</div>`;
     }
   }
- 
+
   function bindLivePostEvents(root){
     root.querySelectorAll('.post[data-live="1"]').forEach(el=>{
       const id = el.dataset.post;
@@ -316,14 +316,14 @@ const WH = (() => {
       });
     });
   }
- 
+
   function highlightActiveNav(){
     const page = document.body.dataset.page;
     document.querySelectorAll('.nav__link[data-page]').forEach(a=>{
       a.classList.toggle('active', a.dataset.page === page);
     });
   }
- 
+
   function initModal(id){
     const overlay = document.getElementById(id);
     if(!overlay) return { open(){}, close(){} };
@@ -334,12 +334,12 @@ const WH = (() => {
     function close(){ overlay.classList.remove('open'); }
     return { open, close };
   }
- 
+
   return { ICONS, WORLDS, PEOPLE, POSTS, EVENTS, TRENDS, state, save, person, world, fmt, toast,
            avatarHTML, postCardHTML, renderFeed, addPost, highlightActiveNav, initModal, bindPostEvents,
            isLive, displayName, initialsAvatar };
 })();
- 
+
 document.addEventListener('DOMContentLoaded', ()=>{
   WH.highlightActiveNav();
   if(typeof DB !== 'undefined' && !DB.isConnected){
