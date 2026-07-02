@@ -86,12 +86,37 @@
   </section>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="supabase.js"></script>
 <script src="app.js"></script>
 <script>
-  document.getElementById('signupForm').addEventListener('submit', (e)=>{
+  const worldNameToId = { '💻 البرمجة':'programming', '🤖 الذكاء الاصطناعي':'ai', '🎨 التصميم':'design', '💼 ريادة الأعمال':'business', '🩺 الطب':'medicine', '📈 المالية':'finance' };
+
+  document.getElementById('signupForm').addEventListener('submit', async (e)=>{
     e.preventDefault();
-    WH.toast('تم إنشاء الحساب بنجاح ✓');
-    setTimeout(()=> window.location.href = 'index.html', 700);
+    const inputs = e.target.querySelectorAll('input');
+    const [firstName, lastName, email, password] = inputs;
+    const worldSelect = e.target.querySelector('select');
+    const btn = e.target.querySelector('button[type=submit]');
+
+    if(WH.isLive()){
+      btn.disabled = true; btn.textContent = 'جارٍ الإنشاء...';
+      try{
+        await DB.signUp({
+          email: email.value, password: password.value,
+          firstName: firstName.value, lastName: lastName.value,
+          worldId: worldNameToId[worldSelect.value] || 'programming',
+        });
+        WH.toast('تم إنشاء الحساب! تحقق من بريدك للتأكيد إن كان مفعّلاً ✓');
+        setTimeout(()=> window.location.href = 'login.html', 1200);
+      }catch(err){
+        WH.toast('تعذر إنشاء الحساب: ' + err.message);
+        btn.disabled = false; btn.textContent = 'إنشاء الحساب';
+      }
+    }else{
+      WH.toast('تم إنشاء الحساب بنجاح ✓ (وضع تجريبي — لم يُتصل بقاعدة بيانات بعد)');
+      setTimeout(()=> window.location.href = 'index.html', 900);
+    }
   });
 </script>
 </body>

@@ -204,8 +204,11 @@ const WH = (() => {
     if(feedRootEl) renderFeed(feedRootEl, feedFilter);
   }
 
+  function isLive(){ return typeof DB !== 'undefined' && DB.isConnected; }
+
   function renderFeed(root, filter='foryou'){
     feedRootEl = root; feedFilter = filter;
+    if(isLive()){ renderFeedLive(root); return; }
     let posts = state.posts;
     if(filter==='following') posts = posts.filter(p=>state.following[p.author]);
     if(filter==='worlds') posts = posts.filter(p=>state.joined[p.world]);
@@ -216,9 +219,102 @@ const WH = (() => {
   }
 
   function addPost({text, world:worldId}){
+    if(isLive()){
+      DB.createPost({ content:text, worldId: worldId || 'programming' })
+        .then(()=>renderFeedIfPresent())
+        .catch(err=>toast('تعذر النشر: ' + err.message));
+      return;
+    }
     const id = 'p' + Date.now();
     state.posts.unshift({ id, author:'you', world: worldId || 'programming', time:'الآن', text, likes:0, comments:0, shares:0 });
     save();
+  }
+
+  // ===================== وضع الاتصال الحقيقي (Supabase) =====================
+
+  function displayName(profile){
+    const n = [profile.first_name, profile.last_name].filter(Boolean).join(' ');
+    return n || (profile.handle || 'مستخدم');
+  }
+  function initialsAvatar(profile, size=44){
+    const letter = (profile.first_name || profile.handle || '؟').trim().charAt(0).toUpperCase();
+    const palette = ['#8b5cf6','#3b82f6','#22c55e','#f97316','#ec4899','#14b8a6','#eab308'];
+    const color = palette[(profile.id||'').split('').reduce((s,c)=>s+c.charCodeAt(0),0) % palette.length];
+    if(profile.avatar_url) return `<img class="avatar" style="width:${size}px;height:${size}px;object-fit:cover" src="${profile.avatar_url}">`;
+    return `<div class="avatar" style="width:${size}px;height:${size}px;display:flex;align-items:center;justify-content:center;background:${color};color:#fff;font-weight:800;font-size:${size*0.4}px;">${letter}</div>`;
+  }
+  function timeSince(iso){
+    const s = Math.floor((Date.now() - new Date(iso).getTime())/1000);
+    if(s<60) return 'الآن';
+    if(s<3600) return `قبل ${Math.floor(s/60)} د`;
+    if(s<86400) return `قبل ${Math.floor(s/3600)} س`;
+    return `قبل ${Math.floor(s/86400)} يوم`;
+  }
+
+  function livePostCardHTML(post, currentUserId){
+    const a = post.author || {};
+    const w = world(post.world_id) || { icon:'🌍', name:post.world_id };
+    const likeCount = (post.likes||[]).length;
+    const liked = currentUserId ? (post.likes||[]).some(l=>l.user_id===currentUserId) : false;
+    const commentList = post.comments || [];
+    return `
+    <article class="post" data-post="${post.id}" data-live="1">
+      <div class="post__head">
+        ${initialsAvatar(a)}
+        <div class="post__author">
+          <div class="post__author-line">${displayName(a)}</div>
+          <div class="post__meta"><span>${a.handle||''}</span><span>·</span><span>${timeSince(post.created_at)}</span><span>·</span><span class="world-chip">${w.icon} ${w.name}</span></div>
+        </div>
+        <button class="post__menu">${ICONS.more}</button>
+      </div>
+      <div class="post__body">${post.content}</div>
+      ${post.image_url?`<div class="post__media"><img src="${post.image_url}" alt=""></div>`:''}
+      <div class="post__actions">
+        <button class="post__action like ${liked?'liked':''}">${ICONS.heart}<span>${fmt(likeCount)}</span></button>
+        <button class="post__action comment-toggle">${ICONS.comment}<span>${fmt(commentList.length)}</span></button>
+        <button class="post__action">${ICONS.share}<span>0</span></button>
+      </div>
+      <div class="comments" hidden>
+        ${commentList.map(c=>`<div class="comment">${initialsAvatar(c.author,32)}<div class="comment__bubble"><div class="comment__name">${displayName(c.author||{})}</div><div class="comment__text">${c.content}</div></div></div>`).join('')}
+        <form class="comment-form">
+          ${currentUserId? initialsAvatar({id:currentUserId, first_name:'أ'},32) : ''}
+          <input type="text" placeholder="اكتب تعليقاً..." required>
+        </form>
+      </div>
+    </article>`;
+  }
+
+  async function renderFeedLive(root){
+    root.innerHTML = `<div class="empty-state"><div class="icon">⏳</div>جارٍ تحميل المنشورات من قاعدة البيانات...</div>`;
+    try{
+      const [posts, user] = await Promise.all([ DB.listPosts({ limit:30 }), DB.getCurrentUser() ]);
+      const currentUserId = user ? user.id : null;
+      root.innerHTML = posts.length ? posts.map(p=>livePostCardHTML(p, currentUserId)).join('') :
+        `<div class="empty-state"><div class="icon">🌌</div><div class="fw-800">لا توجد منشورات بعد</div><div class="text-dim mt-8">كن أول من ينشر في WorldHub!</div></div>`;
+      bindLivePostEvents(root);
+    }catch(err){
+      root.innerHTML = `<div class="empty-state"><div class="icon">⚠️</div>تعذر تحميل المنشورات: ${err.message}</div>`;
+    }
+  }
+
+  function bindLivePostEvents(root){
+    root.querySelectorAll('.post[data-live="1"]').forEach(el=>{
+      const id = el.dataset.post;
+      el.querySelector('.like')?.addEventListener('click', async (e)=>{
+        try{ await DB.toggleLike(id); renderFeedIfPresent(); }
+        catch(err){ toast(err.message); }
+      });
+      el.querySelector('.comment-toggle')?.addEventListener('click', ()=>{
+        el.querySelector('.comments').hidden = !el.querySelector('.comments').hidden;
+      });
+      el.querySelector('.comment-form')?.addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        const input = e.target.querySelector('input');
+        if(!input.value.trim()) return;
+        try{ await DB.addComment(id, input.value.trim()); renderFeedIfPresent(); }
+        catch(err){ toast(err.message); }
+      });
+    });
   }
 
   function highlightActiveNav(){
@@ -240,7 +336,17 @@ const WH = (() => {
   }
 
   return { ICONS, WORLDS, PEOPLE, POSTS, EVENTS, TRENDS, state, save, person, world, fmt, toast,
-           avatarHTML, postCardHTML, renderFeed, addPost, highlightActiveNav, initModal, bindPostEvents };
+           avatarHTML, postCardHTML, renderFeed, addPost, highlightActiveNav, initModal, bindPostEvents,
+           isLive, displayName, initialsAvatar };
 })();
 
-document.addEventListener('DOMContentLoaded', ()=>{ WH.highlightActiveNav(); });
+document.addEventListener('DOMContentLoaded', ()=>{
+  WH.highlightActiveNav();
+  if(typeof DB !== 'undefined' && !DB.isConnected){
+    const bar = document.createElement('div');
+    bar.style.cssText = 'position:sticky;top:68px;z-index:39;background:linear-gradient(90deg,#3b2a5e,#241a3d);border-bottom:1px solid var(--border);color:#d9d0ff;font-size:12.5px;font-weight:700;padding:8px 20px;text-align:center;';
+    bar.textContent = '⚠️ الموقع يعمل بوضع تجريبي محلي — لم يتم ربطه بـ Supabase بعد. عدّل SUPABASE_URL و SUPABASE_ANON_KEY في ملف supabase.js';
+    const topbar = document.querySelector('.topbar');
+    if(topbar) topbar.insertAdjacentElement('afterend', bar);
+  }
+});

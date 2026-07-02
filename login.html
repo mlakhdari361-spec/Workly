@@ -81,11 +81,26 @@
   </section>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="supabase.js"></script>
 <script src="app.js"></script>
 <script>
-  document.getElementById('loginForm').addEventListener('submit', (e)=>{
+  document.getElementById('loginForm').addEventListener('submit', async (e)=>{
     e.preventDefault();
-    window.location.href = 'index.html';
+    const [email, password] = e.target.querySelectorAll('input[type=email], input[type=password]');
+    const btn = e.target.querySelector('button[type=submit]');
+    if(WH.isLive()){
+      btn.disabled = true; btn.textContent = 'جارٍ الدخول...';
+      try{
+        await DB.signIn({ email: email.value, password: password.value });
+        window.location.href = 'index.html';
+      }catch(err){
+        WH.toast('فشل تسجيل الدخول: ' + err.message);
+        btn.disabled = false; btn.textContent = 'تسجيل الدخول';
+      }
+    }else{
+      window.location.href = 'index.html';
+    }
   });
 </script>
 </body>
