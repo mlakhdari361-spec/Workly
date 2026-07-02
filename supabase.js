@@ -6,8 +6,8 @@
 // -----------------------------------------------------------------
 // 1) ضع بيانات مشروعك هنا (Supabase → Project Settings → API)
 // -----------------------------------------------------------------
-const SUPABASE_URL = 'YOUR_SUPABASE_URL';           // مثال: https://xxxxx.supabase.co
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';  // مفتاح anon public
+const SUPABASE_URL = 'https://thtekvgrwnhsuhmrvzwu.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_jfeWUimKLNDx_MBkaF4wMA_ZmGkq_10';
 
 // -----------------------------------------------------------------
 // 2) تهيئة العميل — إن لم تُضبط البيانات أعلاه يبقى الموقع
