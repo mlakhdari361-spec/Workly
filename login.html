@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<style>html{visibility:hidden}</style>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WorldHub — تسجيل الدخول</title>
@@ -73,9 +72,9 @@
 
     <div class="or-sep">أو المتابعة عبر</div>
     <div class="social-row">
-      <button class="btn btn-secondary">Google</button>
-      <button class="btn btn-secondary">Apple</button>
-      <button class="btn btn-secondary">GitHub</button>
+      <button type="button" class="btn btn-secondary" data-provider="google">Google</button>
+      <button type="button" class="btn btn-secondary" data-provider="apple">Apple</button>
+      <button type="button" class="btn btn-secondary" data-provider="github">GitHub</button>
     </div>
 
     <div class="foot-link">ليس لديك حساب؟ <a href="signup.html">إنشاء حساب جديد</a></div>
@@ -103,6 +102,25 @@
     }else{
       window.location.href = 'index.html';
     }
+  });
+
+  // ---- تسجيل الدخول عبر Google / Apple / GitHub ----
+  document.querySelectorAll('.social-row [data-provider]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const provider = btn.dataset.provider;
+      if(!WH.isLive()){
+        WH.toast('تسجيل الدخول عبر ' + btn.textContent + ' يتطلب اتصالاً حقيقياً بـ Supabase (وضع تجريبي حالياً)');
+        return;
+      }
+      btn.disabled = true;
+      try{
+        // سيُعيد Supabase توجيه المتصفح تلقائياً إلى صفحة تسجيل الدخول الخاصة بالمزوّد
+        await DB.signInWithOAuth(provider);
+      }catch(err){
+        WH.toast('تعذر تسجيل الدخول عبر ' + btn.textContent + ': ' + err.message);
+        btn.disabled = false;
+      }
+    });
   });
 </script>
 </body>

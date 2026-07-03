@@ -50,6 +50,19 @@ const DB = (() => {
     if(error) throw error;
   }
 
+  // provider: 'google' | 'apple' | 'github' ...
+  // يجب تفعيل المزوّد المطلوب مسبقاً من Supabase → Authentication → Providers،
+  // وإضافة Redirect URL الصحيح لموقعك هناك (وفي إعدادات Google Cloud OAuth Client).
+  async function signInWithOAuth(provider){
+    assertConnected();
+    const { data, error } = await sbClient.auth.signInWithOAuth({
+      provider,
+      options: { redirectTo: window.location.origin + window.location.pathname.replace(/login\.html$/, 'index.html') }
+    });
+    if(error) throw error;
+    return data; // يُعيد المتصفح توجيهه تلقائياً لصفحة تسجيل دخول Google
+  }
+
   async function getSession(){
     if(!isConnected) return null;
     const { data } = await sbClient.auth.getSession();
@@ -162,7 +175,7 @@ const DB = (() => {
 
   return {
     isConnected, sbClient,
-    signUp, signIn, signOut, getSession, getCurrentUser,
+    signUp, signIn, signOut, signInWithOAuth, getSession, getCurrentUser,
     getProfile, updateProfile, getFollowCounts,
     listPosts, createPost, deletePost,
     toggleLike, addComment, toggleFollow,

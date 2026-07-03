@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<style>html{visibility:hidden}</style>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WorldHub — استكشاف العوالم</title>
@@ -71,13 +70,13 @@
     const list = WH.WORLDS.filter(w=> w.name.includes(filter));
     grid.innerHTML = list.map(w=>`
       <div class="card world-card">
-        <div class="world-card__top">
+        <a class="world-card__top" href="world.html?id=${w.id}" style="text-decoration:none;color:inherit;">
           <div class="world-card__icon" style="background:${w.color}22;color:${w.color}">${w.icon}</div>
           <div>
             <div class="world-card__name">${w.name}</div>
             <div class="world-card__meta">${WH.fmt(w.members)} عضو · ${WH.fmt(w.posts)} منشور</div>
           </div>
-        </div>
+        </a>
         <div class="world-card__desc">${w.desc}</div>
         <div class="world-card__stats">
           <span>👥 <b>${WH.fmt(w.members)}</b> عضو</span>
@@ -89,8 +88,13 @@
     grid.querySelectorAll('.join-btn').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         const id = btn.dataset.world;
-        WH.state.joined[id] = !WH.state.joined[id]; WH.save();
-        WH.toast(WH.state.joined[id] ? `انضممت إلى عالم ${WH.world(id).name} 🎉` : 'تمت مغادرة العالم');
+        if(WH.state.joined[id]){
+          // منضم بالفعل: انتقل لصفحة العالم بدل مغادرته بضغطة واحدة
+          window.location.href = 'world.html?id=' + encodeURIComponent(id);
+          return;
+        }
+        WH.state.joined[id] = true; WH.save();
+        WH.toast(`انضممت إلى عالم ${WH.world(id).name} 🎉`);
         renderGrid(document.getElementById('worldSearchInput').value);
       });
     });

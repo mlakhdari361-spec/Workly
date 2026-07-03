@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WorldHub — العالم</title>
+<link rel="stylesheet" href="main.css">
+<link rel="stylesheet" href="sidebar.css">
+<link rel="stylesheet" href="tabs.css">
+<style>
+  .world-cover{ height:170px; border-radius:var(--radius-lg); position:relative; overflow:hidden; display:flex; align-items:flex-end; padding:22px; }
+  .world-head{ display:flex; align-items:center; gap:16px; padding:20px 22px; }
+  .world-head__icon{ width:64px; height:64px; border-radius:18px; display:flex; align-items:center; justify-content:center; font-size:30px; flex-shrink:0; margin-top:-46px; border:4px solid var(--bg-card); }
+  .world-head__name{ font-family:var(--font-display); font-weight:900; font-size:21px; }
+  .world-head__desc{ color:var(--text-dim); font-size:13.5px; margin-top:3px; max-width:520px; }
+  .world-stats-row{ display:flex; gap:22px; padding:0 22px 18px; flex-wrap:wrap; }
+  .world-stats-row b{ font-family:var(--font-display); font-size:16px; }
+  .world-stats-row span{ color:var(--text-faint); font-size:12px; }
+  .world-actions{ margin-inline-start:auto; display:flex; gap:10px; padding:0 22px 18px; }
+  .not-found{ text-align:center; padding:70px 20px; }
+  .not-found .icon{ font-size:44px; margin-bottom:14px; }
+</style>
+</head>
+<body data-page="worlds">
+
+<header class="topbar">
+  <a href="index.html" class="brand"><div class="brand__mark">🌍</div><div class="brand__name">World<span>Hub</span></div></a>
+  <div class="topbar__search"><span id="ic-search"></span><input type="text" placeholder="ابحث..."><span class="kbd">⌘K</span></div>
+  <div class="topbar__actions">
+    <a href="notifications.html" class="icon-btn"><span class="badge">8</span><span id="ic-bell"></span></a>
+    <a href="messages.html" class="icon-btn"><span class="badge">3</span><span id="ic-msg"></span></a>
+    <a href="profile.html"><img class="avatar" width="40" height="40" src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=200&auto=format&fit=crop"></a>
+  </div>
+</header>
+
+<div class="layout layout--narrow">
+  <aside class="col-right col-sticky">
+    <nav class="nav">
+      <a href="index.html" class="nav__link" data-page="home">${nav-home}<span>الرئيسية</span></a>
+      <a href="reels.html" class="nav__link" data-page="reels">${nav-reels}<span>الريلز</span></a>
+      <a href="messages.html" class="nav__link" data-page="messages">${nav-messages}<span>الرسائل</span></a>
+      <a href="notifications.html" class="nav__link" data-page="notifications">${nav-bell}<span>الإشعارات</span></a>
+      <a href="worlds.html" class="nav__link" data-page="worlds">${nav-globe}<span>العوالم</span></a>
+      <a href="dashboard.html" class="nav__link" data-page="dashboard">${nav-dashboard}<span>لوحة المعلومات</span></a>
+      <a href="profile.html" class="nav__link" data-page="profile">${nav-user}<span>الملف الشخصي</span></a>
+    </nav>
+  </aside>
+
+  <main class="col-center" style="max-width:900px;" id="worldMain">
+    <!-- يُملأ عبر JavaScript بناءً على ?id= -->
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="supabase.js"></script>
+<script src="auth-guard.js"></script>
+<script src="app.js"></script>
+<script>
+  const iconMap = {'ic-search':'search','ic-bell':'bell','ic-msg':'messages','nav-home':'home','nav-reels':'reels','nav-messages':'messages','nav-bell':'bell','nav-globe':'globe','nav-dashboard':'dashboard','nav-user':'user'};
+  document.body.innerHTML = document.body.innerHTML.replace(/\$\{([a-z0-9\-]+)\}/g, (_, key) => WH.ICONS[iconMap[key]] || '');
+
+  const params = new URLSearchParams(location.search);
+  const worldId = params.get('id');
+  const w = worldId ? WH.world(worldId) : null;
+  const main = document.getElementById('worldMain');
+
+  if(!w){
+    main.innerHTML = `
+      <div class="card not-found">
+        <div class="icon">🌌</div>
+        <div class="fw-800" style="font-size:17px;">هذا العالم غير موجود</div>
+        <div class="text-dim mt-8">تأكد من الرابط، أو تصفّح كل العوالم المتاحة.</div>
+        <a href="worlds.html" class="btn btn-primary mt-16" style="display:inline-flex;">تصفّح العوالم</a>
+      </div>`;
+  } else {
+    document.title = 'WorldHub — ' + w.name;
+    renderWorld();
+  }
+
+  function renderWorld(){
+    const joined = !!WH.state.joined[w.id];
+    main.innerHTML = `
+      <div class="card">
+        <div class="world-cover" style="background:linear-gradient(160deg, ${w.color}55, #0c0c14 75%);">
+          <div class="pill-tag">${w.icon} ${w.name}</div>
+        </div>
+        <div class="world-head">
+          <div class="world-head__icon" style="background:${w.color}22;color:${w.color}">${w.icon}</div>
+          <div>
+            <div class="world-head__name">${w.name}</div>
+            <div class="world-head__desc">${w.desc}</div>
+          </div>
+        </div>
+        <div class="flex">
+          <div class="world-stats-row">
+            <div><b>${WH.fmt(w.members)}</b><br><span>عضو</span></div>
+            <div><b>${WH.fmt(w.posts)}</b><br><span>منشور</span></div>
+            <div><b>${w.jobs}</b><br><span>وظيفة</span></div>
+          </div>
+          <div class="world-actions">
+            <button class="btn ${joined?'btn-secondary':'btn-primary'}" id="worldJoinBtn">${joined?'✓ منضم':'انضمام إلى العالم'}</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mt-16">
+        <div class="feed-tabs">
+          <button class="feed-tabs__link active">منشورات العالم</button>
+        </div>
+        <div id="feedRoot"></div>
+      </div>`;
+
+    document.getElementById('worldJoinBtn').addEventListener('click', ()=>{
+      WH.state.joined[w.id] = !WH.state.joined[w.id]; WH.save();
+      WH.toast(WH.state.joined[w.id] ? `انضممت إلى عالم ${w.name} 🎉` : 'تمت مغادرة العالم');
+      renderWorld();
+    });
+
+    const feedRoot = document.getElementById('feedRoot');
+    if(WH.isLive()){
+      WH.renderFeed(feedRoot, 'foryou'); // TODO: فلترة حسب world_id عند الاتصال الحقيقي بقاعدة البيانات
+    } else {
+      const posts = WH.state.posts.filter(p=>p.world===w.id);
+      feedRoot.innerHTML = posts.length ? posts.map(WH.postCardHTML).join('') :
+        `<div class="empty-state"><div class="icon">📝</div>لا توجد منشورات في هذا العالم بعد</div>`;
+      WH.bindPostEvents(feedRoot);
+    }
+  }
+</script>
+</body>
+</html>

@@ -29,6 +29,7 @@ const WH = (() => {
     image:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="8.5" cy="9.5" r="1.6"/><path d="m21 16-5-5-9 9"/></svg>`,
     video:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5.5" width="14" height="13" rx="2.5"/><path d="m21.5 8-5 3 5 3z"/></svg>`,
     poll:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M12 20V4M20 20v-7"/></svg>`,
+    logout:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>`,
   };
 
   const WORLDS = [
@@ -324,6 +325,27 @@ const WH = (() => {
     });
   }
 
+  function injectLogout(){
+    const nav = document.querySelector('.nav');
+    if(!nav || nav.querySelector('#navLogoutLink')) return;
+    const a = document.createElement('a');
+    a.href = '#';
+    a.className = 'nav__link';
+    a.id = 'navLogoutLink';
+    a.innerHTML = `${ICONS.logout}<span>تسجيل الخروج</span>`;
+    a.addEventListener('click', async (e)=>{
+      e.preventDefault();
+      if(isLive()){
+        try{ await DB.signOut(); window.location.href = 'login.html'; }
+        catch(err){ toast('تعذر تسجيل الخروج: ' + err.message); }
+      }else{
+        toast('تم تسجيل الخروج (وضع تجريبي محلي)');
+        setTimeout(()=> window.location.href = 'login.html', 600);
+      }
+    });
+    nav.appendChild(a);
+  }
+
   function initModal(id){
     const overlay = document.getElementById(id);
     if(!overlay) return { open(){}, close(){} };
@@ -337,11 +359,12 @@ const WH = (() => {
 
   return { ICONS, WORLDS, PEOPLE, POSTS, EVENTS, TRENDS, state, save, person, world, fmt, toast,
            avatarHTML, postCardHTML, renderFeed, addPost, highlightActiveNav, initModal, bindPostEvents,
-           isLive, displayName, initialsAvatar };
+           isLive, displayName, initialsAvatar, injectLogout };
 })();
 
 document.addEventListener('DOMContentLoaded', ()=>{
   WH.highlightActiveNav();
+  WH.injectLogout();
   if(typeof DB !== 'undefined' && !DB.isConnected){
     const bar = document.createElement('div');
     bar.style.cssText = 'position:sticky;top:68px;z-index:39;background:linear-gradient(90deg,#3b2a5e,#241a3d);border-bottom:1px solid var(--border);color:#d9d0ff;font-size:12.5px;font-weight:700;padding:8px 20px;text-align:center;';
