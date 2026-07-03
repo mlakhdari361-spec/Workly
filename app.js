@@ -30,6 +30,9 @@ const WH = (() => {
     video:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5.5" width="14" height="13" rx="2.5"/><path d="m21.5 8-5 3 5 3z"/></svg>`,
     poll:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M12 20V4M20 20v-7"/></svg>`,
     logout:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>`,
+    edit:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>`,
+    trash:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/><path d="M10 11v6M14 11v6"/></svg>`,
+    link:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17H7a5 5 0 0 1 0-10h2M15 7h2a5 5 0 0 1 0 10h-2M8 12h8"/></svg>`,
   };
 
   const WORLDS = [
@@ -143,23 +146,30 @@ const WH = (() => {
     const liked = !!state.liked[post.id];
     const saved = !!state.saved[post.id];
     const likeCount = post.likes + (liked?1:0);
+    const isOwner = post.author === 'you';
     return `
     <article class="post" data-post="${post.id}">
       <div class="post__head">
         ${avatarHTML(a)}
         <div class="post__author">
           <div class="post__author-line">${a.name} ${a.verified?`<svg class="verified" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 2.1 3.1-.6 1 3 3 1-.6 3.1L23 12l-2.1 2.4.6 3.1-3 1-1 3-3.1-.6L12 23l-2.4-2.1-3.1.6-1-3-3-1 .6-3.1L1 12l2.1-2.4-.6-3.1 3-1 1-3 3.1.6z"/><path d="M8.5 12.3l2.3 2.3 4.7-4.9" stroke="#0a0a10" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`:''}</div>
-          <div class="post__meta"><span>${a.handle}</span><span>·</span><span>${post.time}</span><span>·</span><span class="world-chip">${w.icon} ${w.name}</span></div>
+          <div class="post__meta"><span>${a.handle}</span><span>·</span><span>${post.time}</span>${post.edited?'<span>·</span><span>مُعدَّل</span>':''}<span>·</span><span class="world-chip">${w.icon} ${w.name}</span></div>
         </div>
-        <button class="post__menu">${ICONS.more}</button>
+        <div class="post-menu">
+          <button class="post__menu menu-toggle">${ICONS.more}</button>
+          <div class="post-menu__list" hidden>
+            ${isOwner ? `<button data-action="edit">${ICONS.edit}<span>تعديل</span></button><button data-action="delete">${ICONS.trash}<span>حذف</span></button>` : `<button data-action="report">${ICONS.bookmark}<span>إبلاغ (قريباً)</span></button>`}
+          </div>
+        </div>
       </div>
-      <div class="post__body">${post.text}</div>
+      <div class="post__body" data-body>${post.text}</div>
       ${post.image?`<div class="post__media"><img src="${post.image}" alt=""></div>`:''}
+      ${post.video?`<div class="post__media"><video src="${post.video}" controls preload="metadata"></video></div>`:''}
       ${post.code?`<div class="post__code"><div class="post__code-badge" style="background:${post.code.color};color:#111">${post.code.badge}</div><pre>${post.code.lang}</pre></div>`:''}
       <div class="post__actions">
         <button class="post__action like ${liked?'liked':''}">${ICONS.heart}<span>${fmt(likeCount)}</span></button>
         <button class="post__action comment-toggle">${ICONS.comment}<span>${fmt((state.comments[post.id]||[]).length || post.comments)}</span></button>
-        <button class="post__action">${ICONS.share}<span>${fmt(post.shares)}</span></button>
+        <button class="post__action share-post">${ICONS.share}<span>${fmt(post.shares)}</span></button>
         <button class="post__action post__save ${saved?'saved':''}">${ICONS.bookmark}</button>
       </div>
       <div class="comments" hidden>
@@ -359,7 +369,7 @@ const WH = (() => {
 
   return { ICONS, WORLDS, PEOPLE, POSTS, EVENTS, TRENDS, state, save, person, world, fmt, toast,
            avatarHTML, postCardHTML, renderFeed, addPost, highlightActiveNav, initModal, bindPostEvents,
-           isLive, displayName, initialsAvatar, injectLogout };
+           isLive, displayName, initialsAvatar, injectLogout, timeSince };
 })();
 
 document.addEventListener('DOMContentLoaded', ()=>{

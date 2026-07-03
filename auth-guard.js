@@ -12,23 +12,15 @@
 (function () {
   const PROTECTED_REDIRECT = 'login.html';
   const LOGGED_IN_REDIRECT  = 'index.html';
-  // صفحات "عامة" لا يجب حماية الوصول إليها: تسجيل الدخول وإنشاء الحساب.
-  // إن كان المستخدم مسجّلاً دخوله بالفعل، نعيد توجيهه بعيداً عنها.
-  const isPublicAuthPage = document.body.dataset.page === 'login'
-    || document.body.dataset.page === 'signup'
-    || location.pathname.endsWith('login.html')
-    || location.pathname.endsWith('signup.html');
-  const isLoginPage = isPublicAuthPage;
+  const isLoginPage = document.body.dataset.page === 'login'
+    || location.pathname.endsWith('login.html');
 
   // إن لم يكن هناك اتصال حقيقي بـ Supabase (وضع تجريبي محلي)، لا تطبّق أي حماية.
   // هذا يحافظ على عمل الديمو المحلي كما هو دون كسر شيء.
-  if (typeof DB === 'undefined' || !DB.isConnected || typeof DB.sbClient === 'undefined' || !DB.sbClient) {
+  if (typeof DB === 'undefined' || !DB.isConnected || typeof supabaseClient === 'undefined') {
     document.documentElement.style.visibility = 'visible';
     return;
   }
-
-  // العميل الفعلي معرّف في supabase.js باسم DB.sbClient (وليس supabaseClient)
-  const supabaseClient = DB.sbClient;
 
   // أخفِ المحتوى فوراً ريثما يتم التحقق من الجلسة، لمنع "وميض" الصفحة قبل التوجيه
   document.documentElement.style.visibility = 'hidden';

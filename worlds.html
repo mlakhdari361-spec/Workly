@@ -59,7 +59,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="supabase.js"></script>
-<script src="auth-guard.js"></script>
 <script src="app.js"></script>
 <script>
   const iconMap = {'ic-search':'search','ic-bell':'bell','ic-msg':'messages','nav-home':'home','nav-reels':'reels','nav-messages':'messages','nav-bell':'bell','nav-globe':'globe','nav-dashboard':'dashboard','nav-user':'user'};
@@ -70,13 +69,13 @@
     const list = WH.WORLDS.filter(w=> w.name.includes(filter));
     grid.innerHTML = list.map(w=>`
       <div class="card world-card">
-        <a class="world-card__top" href="world.html?id=${w.id}" style="text-decoration:none;color:inherit;">
+        <div class="world-card__top">
           <div class="world-card__icon" style="background:${w.color}22;color:${w.color}">${w.icon}</div>
           <div>
             <div class="world-card__name">${w.name}</div>
             <div class="world-card__meta">${WH.fmt(w.members)} عضو · ${WH.fmt(w.posts)} منشور</div>
           </div>
-        </a>
+        </div>
         <div class="world-card__desc">${w.desc}</div>
         <div class="world-card__stats">
           <span>👥 <b>${WH.fmt(w.members)}</b> عضو</span>
@@ -88,13 +87,8 @@
     grid.querySelectorAll('.join-btn').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         const id = btn.dataset.world;
-        if(WH.state.joined[id]){
-          // منضم بالفعل: انتقل لصفحة العالم بدل مغادرته بضغطة واحدة
-          window.location.href = 'world.html?id=' + encodeURIComponent(id);
-          return;
-        }
-        WH.state.joined[id] = true; WH.save();
-        WH.toast(`انضممت إلى عالم ${WH.world(id).name} 🎉`);
+        WH.state.joined[id] = !WH.state.joined[id]; WH.save();
+        WH.toast(WH.state.joined[id] ? `انضممت إلى عالم ${WH.world(id).name} 🎉` : 'تمت مغادرة العالم');
         renderGrid(document.getElementById('worldSearchInput').value);
       });
     });
